@@ -26,8 +26,8 @@ ore_price("diamond", 50).
     <-  !mine(Ore).
 
 +!mine(Ore): ore_balance(CurrentOre, CurrentAmount) & CurrentOre == Ore
-    <-  .print("Mining ", Ore);
-        .wait(5000);
+    <-  .print("Mining ", Ore, "...");
+        .wait(10000);
         .random(["iron", "gold", "diamond", "nothing", Ore, Ore, Ore], OreFound);
         .random([1, 1, 1, 1, 1, 1 , 2, 2, 2, 3, 3, 6], AmountFound);
 
@@ -39,40 +39,40 @@ ore_price("diamond", 50).
         -ore_balance(CurrentOre, CurrentAmount);
         +ore_balance(CurrentOre, NewAmount);
 
-        .wait(5000);
+        .wait(10000);
 
         !mine(OreBeingSearched).
 
-+!add_to_cart(OreFound, AmountFound, OreBeingSearched): OreFound \== "nothing" & ore_balance(CurrentOre, CurrentAmount) & CurrentOre == OreFound & demand_ore(OreNeeded, AmountNeeded) & OreNeeded == OreBeingSearched & CurrentAmount + AmountFound >= AmountNeeded & ore_price(OrePriceCheck, Price) & OrePriceCheck == OreNeeded & coins(CurrentCoins)
++!add_to_cart(OreFound, AmountFound, OreBeingSearched): OreFound \== "nothing" & ore_balance(CurrentOre, CurrentAmount) & CurrentOre == OreFound & demand_ore(OreNeeded, AmountNeeded) & OreNeeded == OreFound & CurrentAmount + AmountFound >= AmountNeeded & ore_price(OrePriceCheck, Price) & OrePriceCheck == OreNeeded & coins(CurrentCoins)
     <-  .print("Just found ", AmountFound, " ", OreFound, "(s)! Adding it to cart.");
         NewAmount = CurrentAmount + AmountFound;
-        -ore_balance(CurrentOre, CurrentAmount);
+        -ore_balance(CurrentOre, CurrentAmount)[source(_)];
         +ore_balance(CurrentOre, NewAmount);
 
         TotalPrice = AmountNeeded * Price;
 
         .print("Now I have enough ", OreFound, "(s) to fulfill the demand. Going to sell it...");
 
-        .wait(5000);
+        .wait(7500);
 
-        -demand_ore(OreNeeded, AmountNeeded);
+        -demand_ore(OreNeeded, AmountNeeded)[source(_)];
 
         .send(blacksmith, tell, ores_found(OreBeingSearched, AmountNeeded, TotalPrice));
 
         NewCoins = CurrentCoins + TotalPrice;
-        -coins(CurrentCoins);
+        -coins(CurrentCoins)[source(_)];
         +coins(NewCoins);
 
         .print("Just sold ", OreFound, "(s) for ", TotalPrice, " coins! Going back to mining.");
         
-        .wait(5000);
+        .wait(7500);
 
         !choose_ore_to_mine("whatever").
 
 +!add_to_cart(OreFound, AmountFound, OreBeingSearched): OreFound \== "nothing" & ore_balance(CurrentOre, CurrentAmount) & CurrentOre == OreFound
     <-  .print("Just found ", AmountFound, " ", OreFound, "(s)! Adding it to cart.");
         NewAmount = CurrentAmount + AmountFound;
-        -ore_balance(CurrentOre, CurrentAmount);
+        -ore_balance(CurrentOre, CurrentAmount)[source(_)];
         +ore_balance(CurrentOre, NewAmount);
 
         .wait(5000);
@@ -89,10 +89,10 @@ ore_price("diamond", 50).
 
         TotalPrice = AmountNeeded * Price;
 
-        -demand_ore(OreNeeded, AmountNeeded);
+        -demand_ore(OreNeeded, AmountNeeded)[source(_)];
 
         NewOreBalance = CurrentAmount - AmountNeeded;
-        -ore_balance(OreName, CurrentAmount);
+        -ore_balance(OreName, CurrentAmount)[source(_)];
         +ore_balance(OreName, NewOreBalance);
 
         .send(blacksmith, tell, ores_found(Ore, AmountNeeded, TotalPrice));

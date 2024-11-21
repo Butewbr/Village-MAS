@@ -2,16 +2,20 @@
 
 /* Initial beliefs and rules */
 
+tools_bought(0).
+money_sent(0).
+
 /* Initial goals */
 
 !create_demand.
 
 /* Plans */
 
-+!create_demand : .findall(demand(Tool, Ore), demand(ToolDemand, OreDemand), Demands) & .length(Demands, DemandsAmount) & DemandsAmount < 3
++!create_demand : .findall(demand(Tool, Ore), demand(ToolDemand, OreDemand), Demands) & .length(Demands, DemandsAmount) & DemandsAmount < 1
     <-  .print("Let's see what we need...");
 
-        .print("We have ", DemandsAmount, " demand(s).");
+        .wait(10000);
+
         // Escolher um objeto aleatório
         .random(["hammer", "sword", "axe", "pickaxe", "shovel"], ChosenObject);
         
@@ -24,9 +28,7 @@
         .send(blacksmith, tell, demand(ChosenObject, ChosenOre));
         
         // Exibir o que foi escolhido
-        .print("We currently need: ", ChosenOre, " ", ChosenObject);
-
-        .wait(10000);
+        .print("We now need: ", ChosenOre, " ", ChosenObject);
 
         !create_demand.
 
@@ -34,13 +36,25 @@
     <-  .wait(15000);
         !create_demand.
 
-+tool_done(Tool, Ore, Price): demand(DemandTool, DemandOre) & DemandTool == Tool & DemandOre == Ore
++tool_done(Tool, Ore, Price): demand(DemandTool, DemandOre) & DemandTool == Tool & DemandOre == Ore & tools_bought(ToolsBought) & money_sent(MoneySent)
     <-  .print("Blacksmith told me he finished the tool. Time to buy it!");
     
+        .drop_all_intentions;
+
+        -demand(DemandTool, DemandOre)[source(_)];
+        -tool_done(Tool, Ore, Price)[source(_)];
+
+        NewToolsBought = ToolsBought + 1;
+        NewMoneySent = MoneySent + Price;
+
+        -tools_bought(ToolsBought);
+        -money_sent(MoneySent);
+
+        +tools_bought(NewToolsBought);
+        +money_sent(NewMoneySent);
+
         // Comprar a ferramenta
         .send(blacksmith, tell, buy(Tool, Ore, Price));
-
-        -demand(DemandTool, DemandOre);
 
         !create_demand.
 

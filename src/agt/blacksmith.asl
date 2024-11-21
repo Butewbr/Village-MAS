@@ -28,12 +28,12 @@ ore_price("diamond", 50).
     <-  .wait(3000);
         !wait_demand.
 
-+!check_resources(Tool, Ore) : tool_requirement(ToolName, OreRequirement) & ore_balance(OreName, OreAmount) & Tool == ToolName & Ore == OreName & OreAmount >= OreRequirement & ore_price(OrePriceCheck, Price) & OrePriceCheck == Ore
++!check_resources(Tool, Ore) : tool_requirement(ToolName, OreRequirement) & ore_balance(OreName, OreAmount) & Tool == ToolName & Ore == OreName & OreAmount >= OreRequirement & ore_price(OrePriceCheck, Price) & OrePriceCheck == Ore & demand(DemandTool, DemandOre) & DemandTool == Tool & DemandOre == Ore
     <-  .print("I have resources to smith the tool!");
 
         // Atualizar o saldo de minérios
         NewOreAmount = OreAmount - OreRequirement;
-        -ore_balance(OreName, OreAmount);
+        -ore_balance(OreName, OreAmount)[source(_)];
         +ore_balance(OreName, NewOreAmount);
 
         .print("Smithing ", Ore, " ", Tool, "...");
@@ -44,7 +44,11 @@ ore_price("diamond", 50).
 
         TotalPrice = 100 + Price * OreAmount;
 
+        .wait(5000);
+        
         .send(customer, tell, tool_done(Tool, Ore, TotalPrice));
+
+        -demand(Tool, Ore)[source(_)];
 
         !wait_demand.
 
@@ -62,8 +66,10 @@ ore_price("diamond", 50).
 
         // Atualizar o saldo de moedas
         NewCoins = Coins + Price;
-        -coins(Coins);
+        -coins(Coins)[source(_)];
         +coins(NewCoins);
+
+        -buy(Tool, Ore, Price)[source(_)];
 
         !wait_demand.
 
@@ -81,8 +87,10 @@ ore_price("diamond", 50).
 
         NewOreAmount = OreAmount + AmountBought;
 
-        -ore_balance(OreName, OreAmount);
+        -ore_balance(OreName, OreAmount)[source(_)];
         +ore_balance(OreName, NewOreAmount);
+
+        -ores_found(Ore, AmountBought, TotalPrice)[source(_)];
 
         !check_resources(DemandTool, DemandOre).
 
