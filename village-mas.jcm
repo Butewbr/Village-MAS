@@ -1,0 +1,29 @@
+/*
+    JaCaMo Application File Template
+    --------------------------------
+
+    This file defines the initial state of the MAS (initial agents, environment, organisation, ....)
+
+    (see jacamo/doc/jcm.html for more information about what can be defined in this file)
+
+    JaCaMo 1.2
+*/
+
+mas main {
+
+    agent blacksmith: blacksmith.asl {
+      focus: w.c1 
+    }
+
+    agent customer: customer.asl {
+      focus: w.c1 
+    }
+
+    agent miner: miner.asl {
+      focus: w.c1 
+    }
+
+    workspace w {
+      artifact c1: village.Village(3) 
+    }
+}
